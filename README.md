@@ -7,6 +7,12 @@
   <img src="assets/sample_openingstrainer.png" alt="Chess Openings Trainer screenshot" width="720" />
 </p>
 
+
+- 🌐 **Try it:** https://chessopenings.messierexplore.com
+
+
+---
+
 ---
 
 ## What’s inside
@@ -34,31 +40,25 @@
 
 ---
 
-## Quickstart
+## Quickstart (Docker Compose)
 
 ```bash
-# 1) open the app
-cd chess-openings-app
+# build & run from repo root
+docker compose up --build
 
-# 2) install deps
-npm install
-
-# 3) run in dev
-npm run dev
-
-# 4) (optional) production build + preview
-npm run build
-npm run preview
+# app will be available at
+# http://localhost:8000
 ```
 
-If you’re pointing at a backend for openings, set:
+**Configure API base (optional):** If you have a backend at a different URL/port, pass it at build time:
 
-```
-# chess-openings-app/.env
-VITE_API_BASE=http://localhost:5000
+```bash
+VITE_API_BASE=http://localhost:8000 docker compose up --build
 ```
 
 The app expects endpoints like `/api/openings/<set>` where `<set>` is `starter`, `level2`, or `wacky`.
+
+> Compose expects the frontend in `chess-openings-app/` with a Vite build output in `dist/` (Dockerfile handles the build).
 
 ---
 
@@ -68,14 +68,14 @@ The app expects endpoints like `/api/openings/<set>` where `<set>` is `starter`,
 - **react-chessboard 4.x** (board), **chess.js** (rules / SAN→FEN)
 - Plain CSS for the “dark green felt” look
 
-> I pinned **React 18.2** with **react-chessboard 4.x** for reliable repaint & animation (I saw flaky updates on React 19 + 5.x).
-
 ---
 
 ## Project layout
 
 ```
 chess-openings-app/
+  Dockerfile                  # multi-stage (Node build -> Nginx)
+  nginx.conf                  # SPA routing for Nginx
   src/
     api/openingsClient.js     # tiny fetch wrapper (supports VITE_API_BASE)
     components/
@@ -86,6 +86,7 @@ chess-openings-app/
     App.jsx, main.jsx
 assets/
   sample_openingstrainer.png
+docker-compose.yml            # builds and serves frontend on :8080
 ```
 
 ---
@@ -93,9 +94,10 @@ assets/
 ## Design notes & lessons learned
 
 - **Animation model**: render the first `k` SAN moves and let `react-chessboard` animate between positions (don’t remount the board).
-- **Timing**: self-scheduling `setTimeout` (more predictable than `setInterval` under dev React) at **2s per move**.
-- **UX guardrails**: hide the move list until the animation finishes; wrong answers turn red to give immediate feedback without spoiling future guesses.
-- **Compatibility**: React 18 + react-chessboard 4.x gave the smoothest cross-browser results.
+- **Timing**: self-scheduling `setTimeout` at **2s per move** to keep dev behavior predictable.
+- **UX guardrails**: hide the move list until the animation finishes; wrong answers turn red (and disable) to give feedback without spoiling future guesses.
+- **Routing**: Nginx SPA fallback routes unknown paths to `index.html`.
+- **Containerization**: Vite env (`VITE_API_BASE`) wired as a **build arg** so the compiled app points at your API.
 
 ---
 
@@ -108,13 +110,7 @@ assets/
 
 ---
 
-## Using AI
-
-This project was built with AI assistance for scaffolding.  
-**I designed & implemented** the quiz state machine (timers, one-shot animation), the right-column UX, “wrong turns red” flow, and the compatibility fixes (version pinning + board re-render strategy).
-
----
-
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
+
