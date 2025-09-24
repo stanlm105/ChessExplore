@@ -1,0 +1,1 @@
+"""Backend package for the Chess Openings App."""

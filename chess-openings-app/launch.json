@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Backend (module)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "backend.app",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    }
+  ]
+}

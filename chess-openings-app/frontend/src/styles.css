@@ -1,0 +1,112 @@
+:root{
+  --felt:#0b5d2a;
+  --felt-dark:#062716;        /* new: very dark green base */
+  --felt-light:#11733a;
+  --ivory:#f6f3e7;
+  --gold:#c7aa63;
+}
+
+/* Fill viewport + font */
+html,body,#root{height:100%}
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  color:var(--ivory);
+  /* very dark base + subtle felt gradients on top */
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.5), transparent 30%),
+    radial-gradient(1400px 700px at 30% 10%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(900px 450px at 85% 80%, rgba(0,0,0,.35), transparent 60%),
+    linear-gradient(180deg, var(--felt-dark), #04160c);
+  background-color: var(--felt-dark);
+}
+
+/* Center the game vertically */
+.app-center{
+  min-height:100vh;           /* was 100% */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+/* Game shell & trims (unchanged) */
+.game-shell{
+  width:min(920px, 92vw);
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.1));
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:18px;
+  box-shadow: 0 30px 60px rgba(0,0,0,.35), inset 0 0 80px rgba(0,0,0,.25);
+  backdrop-filter: blur(2px);
+  padding:24px 28px;
+}
+
+.game-header{display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap}
+.game-title{margin:0; letter-spacing:.5px; font-size:clamp(22px,3vw,36px)}
+.set-select{
+  background:rgba(0,0,0,.25); color:var(--ivory);
+  border:1px solid rgba(255,255,255,.2); border-radius:10px; padding:6px 10px;
+}
+
+/* NEW: keep score on one line */
+.score-wrap{
+  margin-left:auto;
+  display:flex; align-items:center; gap:16px;
+  white-space:nowrap;                 /* prevents wrap */
+}
+
+.moves-line{opacity:.9; margin:6px 0 12px}
+
+/* Board housing */
+.chessboard-housing{
+  padding:10px;
+  background: linear-gradient(180deg,#f6f3e7,#e7ddb9);
+  border-radius:14px;
+  border:2px solid var(--gold);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 12px 30px rgba(0,0,0,.45);
+}
+
+.board-row{display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap}
+.choices{display:grid; grid-template-columns:repeat(2,minmax(180px,1fr)); gap:12px}
+
+.btn{
+  font:inherit; color:var(--ivory); padding:10px 14px; border-radius:10px;
+  border:1px solid rgba(255,255,255,.2); background:rgba(0,0,0,.25);
+  cursor:pointer; transition:transform .08s ease, background .15s ease, box-shadow .15s ease;
+}
+.btn:hover{transform:translateY(-1px); background:rgba(255,255,255,.08); box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.btn:disabled{opacity:.6; cursor:not-allowed}
+.btn-primary{background:linear-gradient(180deg,#24c07b,#118a56); border-color:rgba(0,0,0,.2)}
+.btn-primary:hover{background:linear-gradient(180deg,#2fd190,#149261)}
+
+.result{margin-left:12px; font-weight:800}
+.result.ok{color:#90f0b6}
+.result.bad{color:#ff97a3}
+/* wrong answer pill */
+.btn-wrong{
+  color:#ff97a3;
+  background:rgba(255,0,0,.14);
+  border-color:rgba(255,0,0,.35);
+}
+.btn-wrong:hover{
+  transform:none;
+  background:rgba(255,0,0,.2);
+  box-shadow:none;
+}
+.desc-box{
+  margin-top:8px;
+  padding:10px 12px;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;
+  max-width:420px;
+  line-height:1.35;
+}
+/* Right column next to the board */
+.side-col{
+  min-width: 320px;     /* keeps buttons from squishing */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

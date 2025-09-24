@@ -1,0 +1,40 @@
+{
+  "name": "chess-openings-app",
+  "version": "1.0.0",
+  "description": "A chess-themed web application that helps users learn chess openings through interactive animations.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+"dependencies": {
+  "react": "18.2.0",
+  "react-dom": "18.2.0",
+  "react-chessboard": "4.3.2",
+  "chess.js": "^1.4.0",
+  "axios": "^1.12.2"
+},
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.3",
+    "vite": "^7.1.7"
+  }
+}

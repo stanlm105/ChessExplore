@@ -1,0 +1,1 @@
+"""Openings data package."""
