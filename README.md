@@ -104,9 +104,8 @@ docker-compose.yml            # builds and serves frontend on :8080
 ## Future ideas
 
 - Sound FX + per-move progress ring  
-- Difficulty levels or ELO tags per opening  
-- “Drill mode” for a single opening from both sides  
-- Deploy to Netlify/Vercel (public demo link)
+- Fun ELO popularity stats per opening, mention famous players related to that opening/historical notes
+- One or two continuation lines to inform best routes when encountering this opening
 
 ---
 
