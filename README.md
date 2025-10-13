@@ -1,4 +1,4 @@
-# ChessExplore
+# <img src="assets/chess_logo.png" width=200><br>ChessExplore
 
 > A tiny monorepo for learning and teaching chess openings.  
 > The flagship app is an **Opening Trainer** that plays a line on the board (smoothly 🧈)—you guess the name, get instant feedback, and level up your pattern recognition.
