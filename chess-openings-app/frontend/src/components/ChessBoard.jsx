@@ -24,11 +24,10 @@ export default function ChessBoard({ moves = [], currentMoveIndex = 0 }) {
   return (
     <div style={{ width: 360, maxWidth: "100%" }}>
       <Chessboard
-        /* REMOVE key={fen} so the board doesn't remount */
         position={fen}
         arePiecesDraggable={false}
         arePiecesAnimated={true}
-        animationDuration={300}   // tweak (300–600ms) to taste
+        animationDuration={300}
         boardWidth={360}
       />
     </div>

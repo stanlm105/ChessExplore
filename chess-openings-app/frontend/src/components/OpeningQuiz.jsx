@@ -1,7 +1,4 @@
-// src/components/OpeningQuiz.jsx
-// Quiz flow: pick a random opening from the selected set, animate its moves,
-// and prompt the user to identify it from four options. Only advance after a
-// correct answer; show flavor text and a Next button.
+// Quiz: animate moves and ask user to identify the opening.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useOpenings } from "../hooks/useOpenings";
 import ChessBoard from "./ChessBoard";
@@ -33,6 +30,9 @@ export default function OpeningQuiz() {
   // show moves progressively (no delayed reveal)
   const [wrong, setWrong] = useState(() => new Set()); // clicked incorrects
   const [showNext, setShowNext] = useState(false);     // show Next after correct
+  // Round state: ask each opening once per round
+  const [order, setOrder] = useState([]);              // queue of opening indices
+  const [showFinal, setShowFinal] = useState(false);   // final score modal
 
   // Reset when switching sets
   useEffect(() => {
@@ -41,16 +41,17 @@ export default function OpeningQuiz() {
     setMoveIdx(0); setLocked(false);
   setResult(null);
     setWrong(new Set()); setShowNext(false);
+    setOrder([]); setShowFinal(false);
   }, [bucket]);
 
-  const prepareQuestion = () => {
-    if (!openings?.length) return;
-    const idx = randInt(openings.length);
+  const prepareFromIndex = (idx, nextOrder) => {
+    if (!openings?.length || idx == null) return;
     const correct = openings[idx];
     const pool = openings.filter((_, i) => i !== idx);
     const wrongs = shuffle(pool).slice(0, 3).map(o => o.name);
     const options = shuffle([correct.name, ...wrongs]);
 
+    setOrder(nextOrder);
     setCurrent(correct);
     setChoices(options);
     setLocked(false);
@@ -58,17 +59,27 @@ export default function OpeningQuiz() {
     setQCount(c => c + 1);
     setWrong(new Set());
     setShowNext(false);
-
-    // start anim immediately; step every ~1s until end
-    setMoveIdx(1);
+    setMoveIdx(1); // start anim immediately
   };
 
-  // Start first question when data arrives
-  useEffect(() => {
-    if (!loading && openings?.length && !current) prepareQuestion();
-  }, [loading, openings, current]);
+  const prepareQuestion = () => {
+    if (!openings?.length) return;
+    if (!order.length) { setShowFinal(true); return; }
+    const [idx, ...rest] = order;
+    prepareFromIndex(idx, rest);
+  };
 
-  // One-shot animation (2s). Reveal "Moves:" only after finishing.
+  // Start a fresh round when data is ready
+  useEffect(() => {
+    if (loading || !openings?.length) return;
+    const indices = Array.from({ length: openings.length }, (_, i) => i);
+    const shuffled = shuffle(indices);
+    const [first, ...rest] = shuffled;
+    setScore(0); setQCount(0); setShowFinal(false);
+    prepareFromIndex(first, rest);
+  }, [loading, openings]);
+
+  // One-shot animation (progressive moves line)
   const timerRef = useRef(null);
   useEffect(() => {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
@@ -85,19 +96,20 @@ export default function OpeningQuiz() {
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [current, locked, moveIdx]);
 
-  // Send exactly the first `moveIdx` SANs to the board
+  // First `moveIdx` SAN moves are applied
   const shownMoves = useMemo(() => {
     if (!current) return [];
     return current.moves.slice(0, Math.max(0, Math.min(moveIdx, current.moves.length)));
   }, [current, moveIdx]);
 
-  // Answer handling: only advance after correct; wrongs stay red/disabled
+  // Answer handling
   const handleAnswer = (name) => {
     if (!current || locked) return;
 
     if (name === current.name) {
       setResult("correct");
-      setScore(s => s + 1);
+      // Only award a point if this is the first guess for this question
+      setScore(s => (wrong.size === 0 ? s + 1 : s));
       setLocked(true);
       setShowNext(true);          // show "Next" instead of auto-advancing
     } else {
@@ -126,24 +138,24 @@ export default function OpeningQuiz() {
 
         <div className="score-wrap">
           <span>🏆 <strong>Score:</strong> {score}</span>
-          <span>❓ <strong>Questions:</strong> {qCount}</span>
+          <span>❓ <strong>Question:</strong> {qCount} / {openings.length}</span>
         </div>
 
-        {/* Pause button removed per request */}
+  {/* header end */}
       </div>
 
-{/* "Moves" stays hidden until animation completes */}
+{/* Progressive moves line */}
 {current && (
   <div className="moves-line">Moves: {shownMoves.join(", ")}</div>
 )}
 
 <div className="board-row">
-  {/* Left: the board */}
+  {/* Board */}
   <div className="chessboard-housing">
     <ChessBoard moves={shownMoves} currentMoveIndex={shownMoves.length} />
   </div>
 
-  {/* Right: choices, then result/description/Next */}
+  {/* Choices & feedback */}
   <div className="side-col">
     <div className="choices" role="group" aria-label="Opening choices">
       {choices.map((name) => {
@@ -162,7 +174,7 @@ export default function OpeningQuiz() {
       })}
     </div>
 
-    {/* Feedback + Flavor text + NEXT (now in the right column) */}
+  {/* Feedback and Next */}
     {result === "wrong" && (
       <div className="result bad">❌ Try again!</div>
     )}
@@ -183,6 +195,38 @@ export default function OpeningQuiz() {
   </div>
 </div>
       
+      {/* Final score modal */}
+      {showFinal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="modal-backdrop"
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}
+        >
+          <div
+            className="modal"
+            style={{ background: "#1f2937", color: "#fff", padding: 24, borderRadius: 8, width: "min(420px, 90vw)", boxShadow: "0 10px 30px rgba(0,0,0,0.4)", textAlign: "center" }}
+          >
+            <h2 style={{ marginTop: 0 }}>Round complete</h2>
+            <p style={{ marginBottom: 16 }}>
+              Your score: <strong>{score}</strong> / {qCount}
+            </p>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                if (!openings?.length) { setShowFinal(false); return; }
+                const indices = Array.from({ length: openings.length }, (_, i) => i);
+                const shuffled = shuffle(indices);
+                const [first, ...rest] = shuffled;
+                setScore(0); setQCount(0); setShowFinal(false);
+                prepareFromIndex(first, rest);
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

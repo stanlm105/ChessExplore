@@ -1,9 +1,6 @@
-"""Static data and helpers for chess opening sets.
+"""Static data and helpers for opening sets.
 
-Provides:
-- Opening dataclass
-- Two curated sets: "Starter Opening Set" and "Level 2 Set"
-- get_openings(set_name) -> list[dict]
+Exports: Opening, get_openings(set_name) -> list[dict]
 """
 from __future__ import annotations
 
@@ -24,7 +21,7 @@ class Opening:
         return asdict(self)
 
 
-# Starter Opening Set (10)
+# Starter Opening Set
 STARTER_OPENINGS: List[Opening] = [
     Opening("Ruy Lopez", ["e4", "e5", "Nf3", "Nc6", "Bb5"], "Classic central control and pressure on c6."),
     Opening("Sicilian Defense", ["e4", "c5"], "Dynamic counter to 1.e4 aiming for imbalanced play."),
@@ -38,7 +35,7 @@ STARTER_OPENINGS: List[Opening] = [
     Opening("Scotch Game", ["e4", "e5", "Nf3", "Nc6", "d4"], "Open lines and tactical play."),
 ]
 
-# Level 2 Set (16 openings) — “serious” pack
+# Level 2 Set
 LEVEL2_OPENINGS: List[Opening] = [
     Opening("Grünfeld Defense", ["d4", "Nf6", "c4", "g6"],
             "A dynamic hypermodern defense where Black attacks White's center with ...d5 later."),
@@ -76,7 +73,7 @@ LEVEL2_OPENINGS: List[Opening] = [
             "Iconic Sicilian branch—flexible, dynamic positions with rich theory."),
 ]
 
-# Wacky Set — tricky / trendy / meme openings (12)
+# Wacky Set
 WACKY_OPENINGS: List[Opening] = [
     Opening("Bongcloud Attack", ["e4", "e5", "Ke2"],
             "The infamous king walk—high on meme value, low on theory."),

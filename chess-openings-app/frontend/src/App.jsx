@@ -1,4 +1,4 @@
-// src/App.jsx — top-level shell component
+// src/App.jsx — app shell
 import React from "react";
 import OpeningQuiz from "./components/OpeningQuiz";
 

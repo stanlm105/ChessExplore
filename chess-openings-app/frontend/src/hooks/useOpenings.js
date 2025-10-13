@@ -3,10 +3,7 @@ import { fetchOpenings } from "../api/openingsClient";
 
 const cache = new Map();
 
-/**
- * Fetch and cache openings for a given set bucket.
- * Caches results in-memory by bucket to avoid repeated requests.
- *
+/** Fetch and cache openings for a set bucket (in-memory per bucket).
  * @param {"starter"|"level2"|"wacky"} [bucket="starter"]
  * @returns {{data: any[], loading: boolean, error: any}}
  */

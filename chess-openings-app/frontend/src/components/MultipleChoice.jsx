@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { getMove } from '../api/openingsClient';
 
 /**
- * Simple multiple-choice demo that fetches a single opening by index.
- * Not used by the main quiz, but handy for testing the API.
+ * Multiple-choice demo that fetches a single opening by index.
  *
  * @param {{
  *   setType?: 'starter'|'level2'|'wacky',

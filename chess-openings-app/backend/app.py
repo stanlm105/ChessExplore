@@ -1,4 +1,4 @@
-"""Flask API for serving chess opening sets.
+"""Flask API and static frontend server for the openings trainer.
 
 Endpoints:
 - GET /api/openings/<set_type>
@@ -13,24 +13,24 @@ from typing import Dict, List, Any, Tuple
 from flask import Flask, jsonify, Response, request, send_from_directory
 from flask_cors import CORS
 
-# Prefer absolute import when run as a module; keep relative as fallback for some runners.
+# Absolute import preferred; relative kept as fallback for some runners.
 try:
     from openings.openings_data import get_openings as get_openings_from_data
 except Exception:  # pragma: no cover
     from .openings.openings_data import get_openings as get_openings_from_data  # type: ignore
 
-# Configure static folder to point to repo-root/static (in container) if present.
+# Serve built frontend from ../static when available (container runtime).
 _HERE = os.path.dirname(__file__)
 _STATIC_DIR = os.path.abspath(os.path.join(_HERE, "..", "static"))
 app = Flask(__name__, static_folder=_STATIC_DIR, static_url_path="")
 
-# Enable CORS for the frontend (Vite default ports). Adjust as needed.
+# CORS for local dev (Vite)
 CORS(
     app,
     resources={r"/api/*": {"origins": [r"http://localhost:*", r"http://127.0.0.1:*"]}},
 )
 
-# Map URL slugs → verbose names used by openings_data.py
+# URL slug → canonical set name
 SET_NAME_MAP: Dict[str, str] = {
     "starter": "Starter Opening Set",
     "level2": "Level 2 Set",
@@ -39,11 +39,7 @@ SET_NAME_MAP: Dict[str, str] = {
 
 
 def _resolve_set_name(set_type: str) -> Tuple[str | None, Response | None]:
-    """Resolve a URL set_type slug to a canonical set name or return a JSON 400.
-
-    Returns:
-        (set_name, None) on success, or (None, error_response) on failure.
-    """
+    """Resolve slug to canonical set name or return JSON 400."""
     set_name = SET_NAME_MAP.get(set_type)
     if not set_name:
         return None, jsonify({"error": f"invalid opening set type: {set_type}"}),  # type: ignore[return-value]
@@ -101,22 +97,14 @@ def api_get_move(set_type: str, move_number: int) -> Response:
 @app.get("/")
 @app.get("/<path:path>")
 def serve_frontend(path: str | None = None):
-    """Serve the built frontend from the static folder with SPA fallback.
-
-    If the requested asset exists under the static directory, serve it.
-    Otherwise, return index.html so client-side routing works.
-    When developing the backend without a built frontend, return a hint.
-    """
+    """Serve static assets with SPA fallback to index.html. Returns a hint if build missing."""
     if app.static_folder and os.path.exists(app.static_folder):
         if path and os.path.exists(os.path.join(app.static_folder, path)):
             return send_from_directory(app.static_folder, path)
         index_path = os.path.join(app.static_folder, "index.html")
         if os.path.exists(index_path):
             return send_from_directory(app.static_folder, "index.html")
-    return jsonify({
-        "message": "Frontend build not found. Run `npm run build` in frontend/ or use Vite dev server.",
-        "api_example": "/api/openings/starter"
-    })
+    return jsonify({"message": "frontend build not found", "api_example": "/api/openings/starter"})
 
 
 @app.errorhandler(404)
@@ -133,8 +121,8 @@ def server_error(e: Exception) -> Response:
 
 
 if __name__ == "__main__":
-    # Prefer env PORT for containers/Cloud Run. Fall back to 8000.
+    # Respect PORT (Cloud Run). Default 8000 for local runs.
     port = int(os.environ.get("PORT", "8000"))
-    # Log to stdout in containers
+    # Log to stdout
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
     app.run(host="0.0.0.0", port=port, debug=os.environ.get("FLASK_DEBUG", "0") == "1")
